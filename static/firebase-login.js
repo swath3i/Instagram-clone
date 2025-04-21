@@ -7,16 +7,23 @@ import {
   signOut,
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
+// const firebaseConfig = {
+//   apiKey: "AIzaSyDezxsNT6djmzDzWd0u9TbotcZ_onBPf6c",
+//   authDomain: "instagram-clone-dbf2c.firebaseapp.com",
+//   projectId: "instagram-clone-dbf2c",
+//   storageBucket: "instagram-clone-dbf2c.firebasestorage.app",
+//   messagingSenderId: "266196960107",
+//   appId: "1:266196960107:web:e855c2d8ce124bb51a422e",
+//   measurementId: "G-6TDC8ZQ9PY",
+// };
 const firebaseConfig = {
-  apiKey: "AIzaSyDezxsNT6djmzDzWd0u9TbotcZ_onBPf6c",
-  authDomain: "instagram-clone-dbf2c.firebaseapp.com",
-  projectId: "instagram-clone-dbf2c",
-  storageBucket: "instagram-clone-dbf2c.firebasestorage.app",
-  messagingSenderId: "266196960107",
-  appId: "1:266196960107:web:e855c2d8ce124bb51a422e",
-  measurementId: "G-6TDC8ZQ9PY",
+  apiKey: "AIzaSyBMoMIJMqCIJZDgxEDpUShZCS2o1Ew_nxs",
+  authDomain: "assignment---1-1e153.firebaseapp.com",
+  projectId: "assignment---1-1e153",
+  storageBucket: "assignment---1-1e153.appspot.com",
+  messagingSenderId: "133737118405",
+  appId: "1:133737118405:web:244db60467492f4f10ceac",
 };
-
 window.addEventListener("load", function () {
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
@@ -35,6 +42,7 @@ window.addEventListener("load", function () {
 
         user.getIdToken().then((token) => {
           document.cookie = `token=${token}; path=/; SameSite=Strict`;
+          m;
           console.log("Signup Token Set:", document.cookie);
           window.location = "/";
         });

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .instagram-font {
+            font-family: 'Grand Hotel', cursive;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 flex">
+    <!-- Navigation -->
+    <div class="w-64 border-r border-instagram-border  fixed h-full bg-white z-10">
+        <div class="p-6">
+            <h1 class="text-2xl font-semibold instagram-logo instagram-font">Instagram</h1>
+        </div>
+
+        <nav class="mt-2">
+            <a href="/dashboard" class="flex items-center px-6 py-3 hover:bg-gray-100 font-medium">
+                <i class="fa-solid fa-house text-xl w-6"></i>
+                <span class="ml-4">Home</span>
+            </a>
+            <a href="#" class="flex items-center px-6 py-3 hover:bg-gray-100">
+                <i class="fa-solid fa-search text-xl w-6"></i>
+                <span class="ml-4">Search</span>
+            </a>
+
+            <!-- <a href="#" class="flex items-center px-6 py-3 hover:bg-gray-100">
+                <i class="fa-regular fa-paper-plane text-xl w-6"></i>
+                <span class="ml-4">Messages</span>
+                <span
+                    class="ml-auto bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">2</span>
+            </a>
+            <a href="#" class="flex items-center px-6 py-3 hover:bg-gray-100">
+                <i class="fa-regular fa-heart text-xl w-6"></i>
+                <span class="ml-4">Notifications</span>
+            </a> -->
+            <a href="#" class="flex items-center px-6 py-3 hover:bg-gray-100">
+                <i class="fa-regular fa-square-plus text-xl w-6"></i>
+                <span class="ml-4" id="openModalBtn">Create</span>
+            </a>
+            <a href="#" class="flex items-center px-6 py-3 hover:bg-gray-100">
+                <!-- <img src="/placeholder.svg?height=24&width=24" class="w-6 h-6 rounded-full" alt="Profile"> -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-user-icon lucide-user">
+                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+                <span class="ml-4">Profile</span>
+            </a>
+
+
+        </nav>
+    </div>
+
+    <!-- Profile Header -->
+    <div class="container mx-auto max-w-4xl px-4 py-8">
+        <div class="flex flex-col md:flex-row">
+            <!-- Profile Picture -->
+            <div class="flex justify-center md:justify-start md:w-1/3 mb-4 md:mb-0">
+                <div class="w-24 h-24 md:w-36 md:h-36 rounded-full bg-gray-300" id="profile-pic"></div>
+            </div>
+
+            <!-- Profile Info -->
+            <div class="md:w-2/3">
+                <div class="flex flex-col md:flex-row md:items-center mb-4">
+                    <h1 class="text-xl md:mr-4 mb-2 md:mb-0" id="username">username</h1>
+                    <!-- <button class="bg-blue-500 text-white px-4 py-1 rounded font-medium text-sm">Follow</button> -->
+                </div>
+
+                <!-- Stats -->
+                <div class="flex space-x-4 mb-4">
+                    <div><span id="posts-count" class="font-semibold">0</span> posts</div>
+                    <div class="cursor-pointer" onclick="window.location.href='followers.html'">
+                        <span id="followers-count" class="font-semibold">0</span> followers
+                    </div>
+                    <div class="cursor-pointer" onclick="window.location.href='following.html'">
+                        <span id="following-count" class="font-semibold">0</span> following
+                    </div>
+                </div>
+
+                <!-- Bio -->
+                <div>
+                    <div class="font-semibold" id="profile-name">Profile Name</div>
+                    <!-- <div id="bio">Bio goes here...</div> -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Posts Grid -->
+        <div class="mt-8 border-t pt-4">
+            <div class="flex justify-center space-x-12 mb-4">
+                <div class="text-center border-t border-black pt-4">
+                    <i class="fas fa-th mr-1"></i> POSTS
+                </div>
+            </div>
+
+            <div id="posts-grid" class="grid grid-cols-3 gap-1">
+                <!-- Posts will be loaded here -->
+            </div>
+
+            <!-- No Posts Message -->
+            <div id="no-posts-message" class="hidden text-center py-12">
+                <div class="text-2xl mb-2"><i class="fas fa-camera-retro"></i></div>
+                <h2 class="text-xl font-semibold mb-1">No Posts Yet</h2>
+                <p class="text-gray-500">When you share photos, they'll appear here.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+
+        var userEmail = ""
+        var userDetails = ""
+
+        const profilePic = document.getElementById('profile-pic');
+        const navProfilePic = document.getElementById('nav-profile-pic');
+        const username = document.getElementById('username');
+        const profileName = document.getElementById('profile-name');
+        const bio = document.getElementById('bio');
+        const postsCount = document.getElementById('posts-count');
+        const followersCount = document.getElementById('followers-count');
+        const followingCount = document.getElementById('following-count');
+        const postsGrid = document.getElementById('posts-grid');
+        const noPostsMessage = document.getElementById('no-posts-message');
+
+        function decodeJWT(token) {
+            try {
+                const payload = token.split('.')[1];
+                return JSON.parse(atob(payload));
+            } catch (error) {
+                return {};
+            }
+        }
+
+
+        function getAuthTokenFromCookies(cookieString) {
+            return cookieString
+                .split(';')
+                .map(entry => entry.trim().split('='))
+                .find(([key]) => key === 'token')?.[1] || "";
+        }
+
+        async function checkSession() {
+            console.log("check session")
+            const token = getAuthTokenFromCookies(document.cookie);
+            if (!token) {
+                location.href = "/"
+                return
+            }
+            userEmail = decodeJWT(token).email || "User";
+            return userEmail
+        }
+
+        // Fetch user profile data
+        async function fetchUserProfile(userEmail) {
+            try {
+
+                console.log("inside fetch user ", userEmail)
+                const userDetailsResponse = await fetch("/getUser", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ username: userEmail })
+                })
+                if (userDetailsResponse.status == 200) {
+
+                    const userDetailsJson = await userDetailsResponse.json();
+                    userDetails = userDetailsJson.user;
+                    console.log("user details ", userDetails.posts.length)
+                }
+                // const data = await response.json();
+                username.textContent = userDetails.Username;
+                profileName.textContent = userDetails.name;
+                // bio.textContent = data.bio;
+
+                // Update profile pictures
+                if (userDetails.profileImage) {
+                    profilePic.innerHTML = `<img src="${data.profileImage}" alt="Profile" class="w-full h-full rounded-full object-cover">`;
+                    navProfilePic.innerHTML = `<img src="${data.profileImage}" alt="Profile" class="w-full h-full rounded-full object-cover">`;
+                }
+
+                // Update counts
+                postsCount.textContent = userDetails.posts.length;
+                followersCount.textContent = userDetails.followers.length;
+                followingCount.textContent = userDetails.following.length;
+
+            } catch (error) {
+                console.error('Error fetching user profile:', error);
+            }
+        }
+
+        // Fetch posts
+        async function fetchPosts() {
+            try {
+                // Replace with your actual API endpoint
+                // const response = await fetch('https://api.example.com/user/posts');
+                // const posts = await response.json();
+                var posts = [];
+                const postResponse = await fetch("/getPostsOfUser", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ username: userEmail })
+                })
+                if (postResponse.status == 200) {
+                    const postsJson = await postResponse.json();
+                    posts = postsJson.posts;
+                    // console.log("posts ", posts)
+                }
+
+                if (posts?.length === 0) {
+                    // Show no posts message
+                    noPostsMessage.classList.remove('hidden');
+                    return;
+                }
+
+                // Render posts
+                postsGrid.innerHTML = posts?.map(post => `
+            <div class="aspect-square bg-gray-200 relative overflow-hidden">
+                <img src="${post.imageUrl}" alt="Post" class="w-full h-full object-cover">
+            </div>
+        `).join('');
+
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+                // Show no posts message in case of error
+                noPostsMessage.classList.remove('hidden');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userEmail = await checkSession();
+            fetchUserProfile(userEmail);
+            fetchPosts();
+        });
+    </script>
+</body>
+
+</html>
