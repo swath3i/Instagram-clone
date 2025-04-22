@@ -7,6 +7,8 @@
     <title>Instagram Clone</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -71,6 +73,54 @@
             }
         }
     </style>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .insta-search-results {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .insta-search-results::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .insta-search-results::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .insta-search-results::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .insta-search-results::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .insta-search-modal {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .insta-search-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .insta-search-content {
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .insta-search-modal.active .insta-search-content {
+            transform: translateY(0);
+        }
+    </style>
 </head>
 
 <body class="bg-white">
@@ -86,25 +136,14 @@
                     <i class="fa-solid fa-house text-xl w-6"></i>
                     <span class="ml-4">Home</span>
                 </a>
-                <a href="#" class="flex items-center px-6 py-3 hover:bg-gray-100">
+                <p class="flex cursor-pointer items-center px-6 py-3 hover:bg-gray-100" id="insta-search-trigger">
                     <i class="fa-solid fa-search text-xl w-6"></i>
                     <span class="ml-4">Search</span>
-                </a>
-
-                <!-- <a href="#" class="flex items-center px-6 py-3 hover:bg-gray-100">
-                    <i class="fa-regular fa-paper-plane text-xl w-6"></i>
-                    <span class="ml-4">Messages</span>
-                    <span
-                        class="ml-auto bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">2</span>
-                </a>
-                <a href="#" class="flex items-center px-6 py-3 hover:bg-gray-100">
-                    <i class="fa-regular fa-heart text-xl w-6"></i>
-                    <span class="ml-4">Notifications</span>
-                </a> -->
-                <a href="#" class="flex items-center px-6 py-3 hover:bg-gray-100">
+                </p>
+                <p id="openModalBtn" class="cursor-pointer flex items-center px-6 py-3 hover:bg-gray-100">
                     <i class="fa-regular fa-square-plus text-xl w-6"></i>
-                    <span class="ml-4" id="openModalBtn">Create</span>
-                </a>
+                    <span class="ml-4">Create</span>
+                </p>
                 <a href="/profile" class="flex items-center px-6 py-3 hover:bg-gray-100">
                     <!-- <img src="/placeholder.svg?height=24&width=24" class="w-6 h-6 rounded-full" alt="Profile"> -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -116,7 +155,17 @@
                     <span class="ml-4">Profile</span>
                 </a>
 
+                <button id="sign-out" class="signout-btn flex items-center px-6 py-3 hover:bg-gray-100 w-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-log-out-icon lucide-log-out">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" x2="9" y1="12" y2="12" />
+                    </svg>
+                    <span class="ml-4"> Sign out</span>
 
+                </button>
             </nav>
         </div>
 
@@ -352,6 +401,66 @@
         </div>
     </div>
 
+
+    <!-- Search Modal (Initially Hidden) -->
+    <div id="insta-search-modal"
+        class="insta-search-modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="insta-search-content bg-white rounded-xl shadow-2xl w-full max-w-md mx-4">
+            <!-- Modal Header with Close Button -->
+            <div class="flex justify-between items-center p-4 border-b">
+                <h2 class="text-xl font-semibold">Search Users</h2>
+                <button id="insta-close-search" class="insta-close-btn text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Search Input -->
+            <div class="relative p-4">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-7 pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <input type="text" id="insta-search-input"
+                    class="insta-search-field bg-gray-100 border border-gray-200 text-gray-900 text-sm rounded-full focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-10 py-3"
+                    placeholder="Search by profile name" autocomplete="off">
+                <button id="insta-clear-button"
+                    class="insta-clear-btn absolute inset-y-0 right-0 flex items-center pr-7 hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Search Results -->
+            <div id="insta-search-results" class="insta-search-results hidden px-4">
+                <!-- Results will be populated here -->
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="insta-loading-indicator" class="insta-loading hidden flex justify-center items-center py-4">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+            </div>
+
+            <!-- No Results Message -->
+            <div id="insta-no-results" class="insta-no-results hidden text-center py-4 text-gray-500">
+                No results found
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 border-t text-xs text-gray-500 text-center">
+                Search matches the beginning of profile names
+            </div>
+        </div>
+    </div>
 
     <script>
 
@@ -1194,6 +1303,7 @@
 
     <script>
         // DOM Elements
+        var file = null
         const openModalBtn = document.getElementById('openModalBtn');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const modalBackdrop = document.getElementById('modalBackdrop');
@@ -1232,7 +1342,7 @@
         }
 
         function handleImageUpload(e) {
-            const file = e.target.files[0];
+            file = e.target.files[0];
             if (!file) return;
 
             // Check if file is jpg or png
@@ -1265,8 +1375,27 @@
         submitBtn.addEventListener('click', function () {
             // Here you would typically send the data to a server
             // For this example, we'll just show an alert
-            alert('Post created successfully!');
-            closeModal();
+            // alert('Post created successfully!');
+            const formData = new FormData();
+            formData.append('file_name', file);
+            formData.append('description', description.value);
+            fetch('/upload-file', {
+                method: 'POST',
+                body: formData,
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('File uploaded successfully!');
+                        closeModal(); // Your existing function
+                    } else {
+                        alert('Failed to upload file.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error uploading:', error);
+                    alert('Error uploading file.');
+                });
+            // console.log("description ", description.value)
         });
 
         // Drag and drop functionality
@@ -1321,6 +1450,204 @@
             reader.readAsDataURL(file);
         }
     </script>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Modal elements
+            const searchModal = document.getElementById('insta-search-modal');
+            const searchTrigger = document.getElementById('insta-search-trigger');
+            const closeSearch = document.getElementById('insta-close-search');
+
+            // Search elements
+            const searchInput = document.getElementById('insta-search-input');
+            const searchResults = document.getElementById('insta-search-results');
+            const loadingIndicator = document.getElementById('insta-loading-indicator');
+            const noResults = document.getElementById('insta-no-results');
+            const clearButton = document.getElementById('insta-clear-button');
+
+            let users = [];
+            let debounceTimer;
+
+            // Fetch users when the page loads
+            fetchUsers();
+
+            // Function to fetch users
+            async function fetchUsers() {
+                try {
+                    loadingIndicator.classList.remove('hidden');
+
+                    // Replace this URL with your actual API endpoint
+                    const response = await fetch('/getallusers');
+                    const data = await response.json();
+                    console.log("Data is ", data)
+                    // For demonstration, we'll use mock data if the fetch fails
+                    users = data.users || getMockUsers();
+
+                    loadingIndicator.classList.add('hidden');
+                } catch (error) {
+                    console.error('Error fetching users:', error);
+                    loadingIndicator.classList.add('hidden');
+
+                    // Use mock data for demonstration
+                    users = getMockUsers();
+                }
+            }
+
+            // Function to get mock users for demonstration
+            function getMockUsers() {
+                return [
+                    { username: 'john_doe', profileName: 'John Doe', profilePic: 'https://i.pravatar.cc/150?img=1' },
+                    { username: 'jane_smith', profileName: 'Jane Smith', profilePic: 'https://i.pravatar.cc/150?img=5' },
+                    { username: 'alex_wilson', profileName: 'Alex Wilson', profilePic: 'https://i.pravatar.cc/150?img=3' },
+                    { username: 'sarah_johnson', profileName: 'Sarah Johnson', profilePic: 'https://i.pravatar.cc/150?img=4' },
+                    { username: 'mike_brown', profileName: 'Mike Brown', profilePic: 'https://i.pravatar.cc/150?img=6' },
+                    { username: 'jessica_taylor', profileName: 'Jessica Taylor', profilePic: 'https://i.pravatar.cc/150?img=7' },
+                    { username: 'david_miller', profileName: 'David Miller', profilePic: 'https://i.pravatar.cc/150?img=8' },
+                    { username: 'emily_davis', profileName: 'Emily Davis', profilePic: 'https://i.pravatar.cc/150?img=9' },
+                    { username: 'james_wilson', profileName: 'James Wilson', profilePic: 'https://i.pravatar.cc/150?img=10' },
+                    { username: 'olivia_martin', profileName: 'Olivia Martin', profilePic: 'https://i.pravatar.cc/150?img=11' },
+                    { username: 'daniel_anderson', profileName: 'Daniel Anderson', profilePic: 'https://i.pravatar.cc/150?img=12' },
+                    { username: 'sophia_thomas', profileName: 'Sophia Thomas', profilePic: 'https://i.pravatar.cc/150?img=13' },
+                    { username: 'matthew_jackson', profileName: 'Matthew Jackson', profilePic: 'https://i.pravatar.cc/150?img=14' },
+                    { username: 'ava_white', profileName: 'Ava White', profilePic: 'https://i.pravatar.cc/150?img=15' },
+                    { username: 'joseph_harris', profileName: 'Joseph Harris', profilePic: 'https://i.pravatar.cc/150?img=16' }
+                ];
+            }
+
+            // Open search modal
+            searchTrigger.addEventListener('click', function () {
+                searchModal.classList.add('active');
+                setTimeout(() => {
+                    searchInput.focus();
+                }, 300);
+            });
+
+            // Close search modal
+            closeSearch.addEventListener('click', function () {
+                searchModal.classList.remove('active');
+                resetSearch();
+            });
+
+            // Close modal when clicking outside
+            searchModal.addEventListener('click', function (e) {
+                if (e.target === searchModal) {
+                    searchModal.classList.remove('active');
+                    resetSearch();
+                }
+            });
+
+            // Reset search state
+            function resetSearch() {
+                searchInput.value = '';
+                searchResults.classList.add('hidden');
+                noResults.classList.add('hidden');
+                clearButton.classList.add('hidden');
+            }
+
+            // Search input event listener
+            searchInput.addEventListener('input', function () {
+                const searchTerm = this.value.trim();
+
+                // Show/hide clear button
+                if (searchTerm.length > 0) {
+                    clearButton.classList.remove('hidden');
+                } else {
+                    clearButton.classList.add('hidden');
+                }
+
+                // Debounce search to avoid too many searches while typing
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    if (searchTerm.length > 0) {
+                        searchUsers(searchTerm);
+                    } else {
+                        searchResults.classList.add('hidden');
+                        noResults.classList.add('hidden');
+                    }
+                }, 300);
+            });
+
+            // Clear button event listener
+            clearButton.addEventListener('click', function () {
+                searchInput.value = '';
+                searchResults.classList.add('hidden');
+                noResults.classList.add('hidden');
+                clearButton.classList.add('hidden');
+                searchInput.focus();
+            });
+
+            // Function to search users
+            function searchUsers(searchTerm) {
+                // Filter users by profile name (matching the beginning)
+                const filteredUsers = users.filter(user =>
+                    user.profileName.toLowerCase().startsWith(searchTerm.toLowerCase())
+                );
+
+                // Display results
+                if (filteredUsers.length > 0) {
+                    displayResults(filteredUsers);
+                    searchResults.classList.remove('hidden');
+                    noResults.classList.add('hidden');
+                } else {
+                    searchResults.classList.add('hidden');
+                    noResults.classList.remove('hidden');
+                }
+            }
+
+            // Function to display search results
+            function displayResults(results) {
+                searchResults.innerHTML = '';
+
+                results.forEach(user => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'insta-result-item flex items-center p-3 hover:bg-gray-100 cursor-pointer rounded-md';
+                    resultItem.innerHTML = `
+                    <a href="/userprofile/${user.username}" class="flex">
+                        <div class="insta-user-avatar flex-shrink-0">
+                            <img 
+                                class="h-12 w-12 rounded-full object-cover" 
+                                src="${user.profilePic}" 
+                                alt="User profile picture"
+                                onerror="this.onerror=null; this.src='https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg';"
+                                />
+
+                        </div>
+                        <div class="insta-user-info ml-3">
+                            <p class="insta-profile-name text-sm font-medium text-gray-900">${user.profileName}</p>
+                            <p class="insta-username text-sm text-gray-500">@${user.username}</p>
+                        </div>
+                    </a>
+                `;
+
+                    // Add click event to result item
+                    resultItem.addEventListener('click', function () {
+                        // Handle click on user (e.g., navigate to profile)
+                        console.log(`Clicked on user: ${user.username}`);
+                        // You can add navigation or other actions here
+
+                        // Close the modal after selection
+                        searchModal.classList.remove('active');
+                        resetSearch();
+                    });
+
+                    searchResults.appendChild(resultItem);
+                });
+            }
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && searchModal.classList.contains('active')) {
+                    searchModal.classList.remove('active');
+                    resetSearch();
+                }
+            });
+        });
+    </script>
+
+    <!-- <script type="module" src="../static/firebase-login.js"></script> -->
+    <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
+
 </body>
 
 </html>

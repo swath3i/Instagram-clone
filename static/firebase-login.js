@@ -31,7 +31,7 @@ window.addEventListener("load", function () {
   updateUI(document.cookie);
   console.log("Firebase App Initialized");
 
-  document.getElementById("sign-up").addEventListener("click", function () {
+  document.getElementById("sign-up")?.addEventListener("click", function () {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
 
@@ -42,7 +42,6 @@ window.addEventListener("load", function () {
 
         user.getIdToken().then((token) => {
           document.cookie = `token=${token}; path=/; SameSite=Strict`;
-          m;
           console.log("Signup Token Set:", document.cookie);
           window.location = "/";
         });
@@ -52,7 +51,7 @@ window.addEventListener("load", function () {
       });
   });
 
-  document.getElementById("login").addEventListener("click", function () {
+  document.getElementById("login")?.addEventListener("click", function () {
     console.log("clicking");
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
@@ -72,8 +71,8 @@ window.addEventListener("load", function () {
         console.error("Login Error:", error.code, error.message);
       });
   });
-
-  document.getElementById("sign-out").addEventListener("click", function () {
+  console.log("near sign out");
+  document.getElementById("sign-out")?.addEventListener("click", function () {
     signOut(auth)
       .then(() => {
         document.cookie = "token=; path=/; SameSite=Strict";
@@ -88,13 +87,16 @@ window.addEventListener("load", function () {
 
 function updateUI(cookie) {
   const token = parseCookieToken(cookie);
-
   if (token.length > 0) {
-    document.getElementById("login-box").hidden = true;
-    document.getElementById("sign-out").hidden = false;
+    const loginBox = document.getElementById("login-box");
+    const signOut = document.getElementById("sign-out");
+    if (loginBox) loginBox.hidden = true;
+    if (signOut) signOut.hidden = false;
   } else {
-    document.getElementById("login-box").hidden = false;
-    document.getElementById("sign-out").hidden = true;
+    const loginBox = document.getElementById("login-box");
+    const signOut = document.getElementById("sign-out");
+    if (loginBox) loginBox.hidden = false;
+    if (signOut) signOut.hidden = true;
   }
 }
 
